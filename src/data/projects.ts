@@ -1,5 +1,6 @@
 import { env } from '@/env.mjs';
 import { fetcher } from '@/lib/fetcher';
+import { mockEnv } from '@/lib/mock-data';
 
 export interface TechStack {
     tech_name: string;
@@ -16,7 +17,8 @@ export interface Project {
     active: boolean;
 }
 
-const projectURL = env.NEXT_PUBLIC_PAYLOAD_URI + '/api/projects?limit=20';
+const projectURL =
+    (env.NEXT_PUBLIC_PAYLOAD_URI ?? mockEnv.NEXT_PUBLIC_PAYLOAD_URI) + '/api/projects?limit=20';
 
 /*
     Fetches projects and techstack from Payload CMS and transforms them into the required format.

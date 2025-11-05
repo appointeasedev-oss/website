@@ -1,5 +1,6 @@
 import { env } from '@/env.mjs';
 import { fetcher } from '@/lib/fetcher';
+import { mockEnv } from '@/lib/mock-data';
 
 type CommitteeMember = {
     name: string;
@@ -10,7 +11,9 @@ type CommitteeMember = {
 // List of committee members with name, role and whether they are part of the
 // executive committee
 
-const committeeMemberURL = env.NEXT_PUBLIC_PAYLOAD_URI + '/api/committee-members?limit=50';
+const committeeMemberURL =
+    (env.NEXT_PUBLIC_PAYLOAD_URI ?? mockEnv.NEXT_PUBLIC_PAYLOAD_URI) +
+    '/api/committee-members?limit=50';
 const EXEC_ROLE_PRIORITY = ['President', 'Vice President', 'Treasurer', 'Secretary'];
 
 function sortCommitteeMembers(members: CommitteeMember[]) {

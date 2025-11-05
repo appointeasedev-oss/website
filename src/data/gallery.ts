@@ -1,5 +1,6 @@
 import { env } from '@/env.mjs';
 import { fetcher } from '@/lib/fetcher';
+import { mockEnv } from '@/lib/mock-data';
 
 export type Gallery = {
     eventName: string;
@@ -34,7 +35,8 @@ export type PayloadGallery = {
 };
 
 // Payload URL
-export const galleryURL = env.NEXT_PUBLIC_PAYLOAD_URI + '/api/gallery?limit=100';
+export const galleryURL =
+    (env.NEXT_PUBLIC_PAYLOAD_URI ?? mockEnv.NEXT_PUBLIC_PAYLOAD_URI) + '/api/gallery?limit=100';
 
 /*
     Fetches galleries from Payload CMS and transforms them into the required format.
@@ -83,7 +85,7 @@ export const parseGalleries = (raw: PayloadGallery): Gallery => {
         images: Array.isArray(raw.images)
             ? raw.images
                   .map((image) => ({
-                      url: `${env.NEXT_PUBLIC_PAYLOAD_URI}${image.url}`,
+                      url: `${env.NEXT_PUBLIC_PAYLOAD_URI ?? mockEnv.NEXT_PUBLIC_PAYLOAD_URI}${image.url}`,
                       width: image.width,
                       height: image.height,
                   }))

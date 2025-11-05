@@ -1,4 +1,5 @@
 import { env } from '@/env.mjs';
+import { mockEnv } from '@/lib/mock-data';
 import Link from 'next/link';
 import { IoChevronForward } from 'react-icons/io5';
 import type { HeaderData } from '..';
@@ -64,7 +65,7 @@ export default function MenuLinks({
         <>
             {isMember && (
                 <Link
-                    href={env.NEXT_PUBLIC_DRIVE_LINK}
+                    href={env.NEXT_PUBLIC_DRIVE_LINK ?? mockEnv.NEXT_PUBLIC_DRIVE_LINK}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={linkClass}

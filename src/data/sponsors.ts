@@ -1,5 +1,6 @@
 import { env } from '@/env.mjs';
 import { fetcher } from '@/lib/fetcher';
+import { mockEnv } from '@/lib/mock-data';
 
 export const SPONSOR_TYPES = ['gold', 'silver', 'bronze'] as const;
 
@@ -24,7 +25,8 @@ interface ApiSponsor {
     website?: string;
 }
 
-export const sponsorURL = env.NEXT_PUBLIC_PAYLOAD_URI + '/api/sponsors?limit=20';
+export const sponsorURL =
+    (env.NEXT_PUBLIC_PAYLOAD_URI ?? mockEnv.NEXT_PUBLIC_PAYLOAD_URI) + '/api/sponsors?limit=20';
 
 /*
     Fetches sponsors from Payload CMS and transforms them into the required format.

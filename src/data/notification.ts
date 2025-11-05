@@ -1,11 +1,17 @@
 import type { NotificationData, ImageData } from '@/components/Notification/types';
 import { env } from '@/env.mjs';
 import { fetcher } from '@/lib/fetcher';
+import { mockEnv } from '@/lib/mock-data';
 
-const notificationURL = `${env.NEXT_PUBLIC_PAYLOAD_URI}/api/globals/notification`;
+const notificationURL = `${env.NEXT_PUBLIC_PAYLOAD_URI ?? mockEnv.NEXT_PUBLIC_PAYLOAD_URI}/api/globals/notification`;
 
 const resolveImageUrl = (img?: ImageData): ImageData | undefined =>
-    img?.url ? { ...img, url: env.NEXT_PUBLIC_PAYLOAD_URI + img.url } : undefined;
+    img?.url
+        ? {
+              ...img,
+              url: (env.NEXT_PUBLIC_PAYLOAD_URI ?? mockEnv.NEXT_PUBLIC_PAYLOAD_URI) + img.url,
+          }
+        : undefined;
 
 export async function fetchNotification(): Promise<NotificationData | null> {
     try {

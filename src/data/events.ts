@@ -1,5 +1,6 @@
 import { env } from '@/env.mjs';
 import { fetcher } from '@/lib/fetcher';
+import { mockEnv } from '@/lib/mock-data';
 
 type Month =
     | 'JAN'
@@ -52,7 +53,8 @@ export type PayloadEvent = {
 };
 
 // Payload URL
-export const eventURL = env.NEXT_PUBLIC_PAYLOAD_URI + '/api/events?limit=100';
+export const eventURL =
+    (env.NEXT_PUBLIC_PAYLOAD_URI ?? mockEnv.NEXT_PUBLIC_PAYLOAD_URI) + '/api/events?limit=100';
 
 /*
     Fetches events from Payload CMS and transforms them into the required format.
@@ -150,7 +152,7 @@ export const parseEvents = (raw: PayloadEvent): Event => {
                 ? { href: new URL(raw.link.Link), text: raw.link.displayText }
                 : undefined,
         image: raw.banner
-            ? `${env.NEXT_PUBLIC_PAYLOAD_URI}${raw.banner.url}`
+            ? `${env.NEXT_PUBLIC_PAYLOAD_URI ?? mockEnv.NEXT_PUBLIC_PAYLOAD_URI}${raw.banner.url}`
             : 'public/images/events/upcoming-event.jpg', // Image is in the form of url (Needs a seperate API call)
     };
 };
