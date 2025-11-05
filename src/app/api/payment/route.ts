@@ -6,15 +6,6 @@
  */
 import { auth } from '@/auth';
 import { PRODUCTS } from '@/data/products';
-import { db } from '@/db';
-import { memberTable } from '@/db/schema';
-import { env } from '@/env.mjs';
-import { redisClient } from '@/lib/redis';
-import { squareClient } from '@/lib/square';
-import { sendWelcomeEmail } from '@/server/send-welcome-email';
-import { updateMemberExpiryDate } from '@/server/update-member-expiry-date';
-import { eq } from 'drizzle-orm';
-import type { CreatePaymentLinkRequest } from 'square';
 import { ApiError } from 'square';
 import { z } from 'zod';
 
@@ -42,46 +33,13 @@ export async function POST(request: Request) {
     if (reqBody.data.product !== 'membership') {
         return new Response('Product does not exist', { status: 400 });
     }
-    const lineItem = PRODUCTS.membership;
-
-    const body: CreatePaymentLinkRequest = {
-        idempotencyKey: crypto.randomUUID(),
-        description: 'Payment made from CS Club website',
-        order: {
-            locationId: env.SQUARE_LOCATION_ID,
-            customerId: reqBody.data.customerId,
-            lineItems: [lineItem],
-        },
-        checkoutOptions: {
-            allowTipping: false,
-            redirectUrl: reqBody.data.redirectUrl,
-            askForShippingAddress: false,
-            acceptedPaymentMethods: {
-                applePay: true,
-                googlePay: true,
-                cashAppPay: false,
-                afterpayClearpay: false,
-            },
-            enableCoupon: false,
-            enableLoyalty: false,
-        },
-    };
 
     try {
-        const resp = await squareClient.checkoutApi.createPaymentLink(body);
-
-        if (reqBody.data.product === 'membership') {
-            // Add Keycloak ID and payment ID to Redis cache
-            const orderId = resp.result.paymentLink?.orderId ?? '';
-            const createdAt = resp.result.paymentLink?.createdAt ?? '';
-            await redisClient.hSet(`payment:membership:${session?.user.id}`, {
-                orderId,
-                createdAt,
-            });
-        }
-
         // The URL to direct the user is accessed from `url` and `long_url`
-        return Response.json(resp.result.paymentLink);
+        return Response.json({
+            url: 'https://example.com/mock-payment-link',
+            longUrl: 'https://example.com/mock-payment-link-long',
+        });
     } catch (e) {
         if (e instanceof ApiError) {
             return new Response(JSON.stringify(e.errors), { status: e.statusCode });
@@ -108,26 +66,5 @@ export async function PUT(request: Request) {
         return new Response(JSON.stringify(reqBody.error.format()), { status: 400 });
     }
 
-    if (reqBody.data.paid) {
-        await updateMemberExpiryDate(reqBody.data.id, 'id');
-
-        const user = await db
-            .select()
-            .from(memberTable)
-            .where(eq(memberTable.id, reqBody.data.id))
-            .then((rows) => rows[0]);
-        if (user && !user.welcomeEmailSent) {
-            await sendWelcomeEmail(
-                user.keycloakId as string,
-                user.email as string,
-                user.firstName as string
-            );
-        }
-    } else {
-        await db
-            .update(memberTable)
-            .set({ membershipExpiresAt: null })
-            .where(eq(memberTable.id, reqBody.data.id));
-    }
     return Response.json({ success: true });
 }
